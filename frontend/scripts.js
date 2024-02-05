@@ -1,22 +1,32 @@
-let products = []
+let carrito = []
 let total = 0
+let  productsList = []
 
-function add(product, price) {
-    console.log(product, price);
-    products.push(product)
+function add(productId, price) {
+    const product = productsList.find(p => p.id === productId)
+    product.stock--;
+    console.log(productId, price);
+    carrito.push(productId)
     total = total + price
     document.getElementById("checkout").innerHTML = `Pagar $${total}`
 
 
 }
-function pay() {
-    const productsList = await (await fetch("/api/products")).json()
+//funcion para pagar el carrito
+async function pay() {
+    productsList = await (await fetch("/api/pay",{
+        method: "post",
+        body: JSON.stringify(carrito),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })).json()
 
-    window.alert(products.join(", \n"));
+    //window.alert(products.join(", \n"));
 }
 
 //itera por todos los productos
-function displayProducts(productsList) {
+function displayProducts() {
     let productsHTML = ''
     productsList.forEach(element => {
         productsHTML += 
@@ -28,12 +38,13 @@ function displayProducts(productsList) {
         </div>`
     });
     document.getElementById('page-content').innerHTML = productsHTML 
+    displayProducts()
 }
 //se llama cuando la ventana se termine de cargar
 
 
 window.onload = async () => {
-    const productsList = await (await fetch("/api/products")).json()
+    productsList = await (await fetch("/api/products")).json()
     console.log(productsList);
-    displayProducts(productsList)
+    displayProducts()
 }
